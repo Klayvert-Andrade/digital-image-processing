@@ -365,18 +365,6 @@ PROCESS_CATALOG = ProcessCatalog(
             executor=_impulse_noise_executor("salt_pepper"),
         ),
         ProcessDefinition(
-            identifier="adaptive_median_filter",
-            label="Filtro de mediana adaptativa",
-            category="Filtros espaciais",
-            compatible_modes=frozenset({ImageMode.GRAYSCALE, ImageMode.RGB}),
-            parameters=(
-                ParameterSpec(
-                    "maximum_window", "Janela máxima", ParameterKind.CHOICE, "7", choices=_WINDOWS_3_TO_31, unit="px"
-                ),
-            ),
-            executor=_adaptive_median_executor,
-        ),
-        ProcessDefinition(
             identifier="butterworth_low_pass_frequency",
             label="Passa-baixa Butterworth (frequência)",
             category="Filtros de frequência",
@@ -507,6 +495,18 @@ PROCESS_CATALOG = ProcessCatalog(
             executor=_sobel_executor,
         ),
         ProcessDefinition(
+            identifier="adaptive_median_filter",
+            label="Filtro de mediana adaptativa",
+            category="Filtros espaciais",
+            compatible_modes=frozenset({ImageMode.GRAYSCALE, ImageMode.RGB}),
+            parameters=(
+                ParameterSpec(
+                    "maximum_window", "Janela máxima", ParameterKind.CHOICE, "7", choices=_WINDOWS_3_TO_31, unit="px"
+                ),
+            ),
+            executor=_adaptive_median_executor,
+        ),
+        ProcessDefinition(
             identifier="median_filter",
             label="Filtro de mediana",
             category="Filtros espaciais",
@@ -585,22 +585,6 @@ PROCESS_CATALOG = ProcessCatalog(
             executor=_intensity_slicing_executor,
         ),
         ProcessDefinition(
-            identifier="decompose_rgb",
-            label="Decomposição RGB",
-            category="Decomposições de cor",
-            compatible_modes=frozenset({ImageMode.RGB}),
-            parameters=(),
-            executor=_rgb_decomposition_executor,
-        ),
-        ProcessDefinition(
-            identifier="decompose_hsv",
-            label="Decomposição HSV",
-            category="Decomposições de cor",
-            compatible_modes=frozenset({ImageMode.RGB}),
-            parameters=(),
-            executor=_hsv_decomposition_executor,
-        ),
-        ProcessDefinition(
             identifier="threshold",
             label="Limiarização",
             category="Transformações de intensidade",
@@ -617,6 +601,22 @@ PROCESS_CATALOG = ProcessCatalog(
                 ),
             ),
             executor=_threshold_executor,
+        ),
+        ProcessDefinition(
+            identifier="decompose_rgb",
+            label="Decomposição RGB",
+            category="Decomposições de cor",
+            compatible_modes=frozenset({ImageMode.RGB}),
+            parameters=(),
+            executor=_rgb_decomposition_executor,
+        ),
+        ProcessDefinition(
+            identifier="decompose_hsv",
+            label="Decomposição HSV",
+            category="Decomposições de cor",
+            compatible_modes=frozenset({ImageMode.RGB}),
+            parameters=(),
+            executor=_hsv_decomposition_executor,
         ),
     )
 )
