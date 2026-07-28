@@ -15,6 +15,9 @@ QMainWindow, QWidget {
     font-family: "Segoe UI", Arial, sans-serif;
     font-size: 10.5pt;
 }
+QLabel {
+    background: transparent;
+}
 QStatusBar { background: #121c2a; border-top: 1px solid #26364a; color: #c8d3e2; }
 QFrame#appHeader, QFrame#imagePanel, QGroupBox {
     background: #121d2c;
@@ -53,11 +56,19 @@ QLabel#noticeLabel[severity="error"] {
     padding: 8px 10px;
 }
 QGroupBox {
-    margin-top: 10px;
-    padding: 12px;
+    margin-top: 24px; /* Libera espaço fora da caixa para o texto */
+    padding-top: 12px;
+    padding-bottom: 12px;
     font-weight: 600;
 }
-QGroupBox::title { subcontrol-origin: margin; left: 12px; padding: 0 5px; color: #f0f5fc; }
+QGroupBox::title { 
+    subcontrol-origin: padding; /* Engana o Qt para desenhar a borda inteira */
+    subcontrol-position: top left;
+    left: 12px; 
+    top: -28px; /* Empurra o texto para fora da caixa */
+    color: #f0f5fc; 
+    background: transparent; 
+}
 QPushButton, QToolButton {
     min-height: 30px;
     border-radius: 7px;
@@ -97,18 +108,44 @@ QComboBox QAbstractItemView {
     background: #182537;
     border: 1px solid #33465e;
     color: #edf3fc;
-    selection-background-color: #2873d1;
+    outline: none;
 }
+QComboBox QAbstractItemView::item {
+    padding: 4px;
+}
+QComboBox QAbstractItemView::item:selected, 
+QComboBox QAbstractItemView::item:hover {
+    background: #2873d1;
+    color: white;
+}
+QComboBox QAbstractItemView::item:disabled,
+QComboBox QAbstractItemView::item:disabled:hover,
+QComboBox QAbstractItemView::item:disabled:selected {
+    background: transparent;
+    color: #728096; 
+}
+
 QSlider::groove:horizontal { background: #2a3a50; height: 4px; border-radius: 2px; }
 QSlider::sub-page:horizontal { background: #2873d1; border-radius: 2px; }
 QSlider::handle:horizontal {
     background: #68a5ff; border: 1px solid #a7cbff; width: 16px;
     margin: -6px 0; border-radius: 8px;
 }
-QTabWidget::pane { border: 1px solid #2b3b50; border-radius: 8px; }
+QTabWidget::pane { 
+    border: 1px solid #2b3b50; 
+    border-radius: 8px; 
+    top: 6px; /* Desce a caixa inteira revelando a linha contínua em cima */
+}
+QTabBar {
+    background: transparent;
+    qproperty-drawBase: 0; 
+}
 QTabBar::tab {
-    background: #182537; color: #b9c7d9; border-radius: 6px;
-    padding: 7px 12px; margin-right: 4px;
+    background: #182537; 
+    color: #b9c7d9; 
+    border-radius: 6px;
+    padding: 7px 12px; 
+    margin-right: 4px;
 }
 QTabBar::tab:selected { background: #244c82; color: white; }
 QCheckBox { spacing: 6px; }
