@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QStandardItem, QStandardItemModel
+from PySide6.QtGui import QStandardItem, QStandardItemModel, QWheelEvent, QBrush, QColor, QFont
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QListView,
     QPushButton,
     QSpinBox,
     QVBoxLayout,
@@ -24,6 +25,13 @@ from imagelab.core.catalog import ParameterKind, ParameterSpec, ProcessCatalog
 from imagelab.core.models import ImageDocument, ImageMode
 
 ProcessRequestHandler = Callable[[str, Mapping[str, object]], None]
+
+
+class ProcessComboBox(QComboBox):
+    """A combo box that ignores mouse wheel scrolling to prevent accidental changes."""
+
+    def wheelEvent(self, event: QWheelEvent) -> None:
+        event.ignore()
 
 
 class ProcessPanel(QGroupBox):
@@ -39,7 +47,26 @@ class ProcessPanel(QGroupBox):
         self._parameter_identifier: str | None = None
         self._processing = False
 
-        self.process_combo = QComboBox()
+        self.process_combo = ProcessComboBox()
+        
+        # Força o uso de uma QListView padrão para garantir que as folhas de estilo funcionem
+        self.process_combo.setView(QListView())
+        
+        # Estilo para matar o hover nos itens desabilitados (Pontos 1 e 6)
+        self.process_combo.setStyleSheet("""
+            QComboBox QAbstractItemView::item:disabled:hover {
+                background-color: transparent;
+            }
+        """)
+        
+        # Estilo aplicado para aumentar a hitbox das setinhas (Ponto 2)
+        self.setStyleSheet("""
+            QSpinBox::up-button, QDoubleSpinBox::up-button,
+            QSpinBox::down-button, QDoubleSpinBox::down-button {
+                width: 32px;
+            }
+        """)
+
         self.source_label = QLabel("Entrada: carregue uma imagem PNG.")
         self.source_label.setObjectName("sourceHint")
         self.compatibility_label = QLabel("Carregue uma imagem para habilitar os processos.")
@@ -96,6 +123,10 @@ class ProcessPanel(QGroupBox):
             control.setValue(float(value))
         elif isinstance(control, QCheckBox) and isinstance(value, bool):
             control.setChecked(value)
+        elif isinstance(control, QComboBox) and isinstance(value, str):
+            index = control.findData(value)
+            if index >= 0:
+                control.setCurrentIndex(index)
         else:
             raise KeyError(f"Valor inválido para o parâmetro: {key}.")
 
@@ -128,25 +159,38 @@ class ProcessPanel(QGroupBox):
         selected_index: int | None = None
         first_compatible_index: int | None = None
         current_category: str | None = None
+        
         for definition in self._catalog.all():
             if definition.category != current_category:
                 category = QStandardItem(definition.category)
-                category.setEnabled(False)
+                category.setFlags(Qt.ItemFlag.NoItemFlags)
                 category.setData(None, Qt.ItemDataRole.UserRole)
+                font = QFont()
+                font.setBold(True)
+                category.setFont(font)
+                category.setForeground(QBrush(QColor("#aab9cc")))
                 model.appendRow(category)
                 current_category = definition.category
+                
             item = QStandardItem(f"   {definition.label}")
             item.setData(definition.identifier, Qt.ItemDataRole.UserRole)
             compatible = self._mode is not None and self._mode in definition.compatible_modes
-            item.setEnabled(compatible)
+            
+            if not compatible:
+                item.setFlags(Qt.ItemFlag.NoItemFlags)
+            else:
+                item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                
             entry_index = model.rowCount()
             model.appendRow(item)
             if compatible and first_compatible_index is None:
                 first_compatible_index = entry_index
             if definition.identifier == selected_identifier and compatible:
                 selected_index = entry_index
+                
         if selected_index is None:
             selected_index = first_compatible_index if first_compatible_index is not None else 0
+            
         self.process_combo.blockSignals(True)
         self.process_combo.setModel(model)
         self.process_combo.setCurrentIndex(selected_index)
@@ -215,6 +259,15 @@ class ProcessPanel(QGroupBox):
             boolean_control = QCheckBox()
             boolean_control.setChecked(bool(parameter.default))
             return boolean_control
+        if parameter.kind is ParameterKind.CHOICE:
+            choice_control = QComboBox()
+            choice_control.setView(QListView()) # Mantém a nossa correção de hover
+            for choice in parameter.choices:
+                choice_control.addItem(choice, choice)
+            index = choice_control.findData(str(parameter.default))
+            if index >= 0:
+                choice_control.setCurrentIndex(index)
+            return choice_control
         raise ValueError(f"O controle para {parameter.kind} ainda não foi implementado.")
 
     def _selected_identifier(self) -> str | None:
@@ -228,6 +281,8 @@ class ProcessPanel(QGroupBox):
                 values[key] = control.value()
             elif isinstance(control, QCheckBox):
                 values[key] = control.isChecked()
+            elif isinstance(control, QComboBox):
+                values[key] = control.currentData()
             else:
                 raise RuntimeError(f"Controle não suportado para {key}.")
         return values

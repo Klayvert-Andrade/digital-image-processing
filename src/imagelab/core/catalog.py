@@ -317,6 +317,8 @@ def _impulse_noise_executor(kind: ImpulseKind) -> ProcessExecutor:
 
     return execute
 
+_WINDOWS_3_TO_31 = tuple(str(i) for i in range(3, 33, 2))
+_WINDOWS_3_TO_7 = ("3", "5", "7")
 
 PROCESS_CATALOG = ProcessCatalog(
     (
@@ -369,7 +371,7 @@ PROCESS_CATALOG = ProcessCatalog(
             compatible_modes=frozenset({ImageMode.GRAYSCALE, ImageMode.RGB}),
             parameters=(
                 ParameterSpec(
-                    "maximum_window", "Janela máxima", ParameterKind.INTEGER, 7, 3, 31, "px"
+                    "maximum_window", "Janela máxima", ParameterKind.CHOICE, "7", choices=_WINDOWS_3_TO_31, unit="px"
                 ),
             ),
             executor=_adaptive_median_executor,
@@ -482,7 +484,7 @@ PROCESS_CATALOG = ProcessCatalog(
             category="Realce e bordas",
             compatible_modes=frozenset({ImageMode.GRAYSCALE, ImageMode.RGB}),
             parameters=(
-                ParameterSpec("window", "Janela", ParameterKind.INTEGER, 3, 3, 31, "px"),
+                ParameterSpec("window", "Janela", ParameterKind.CHOICE, "3", choices=_WINDOWS_3_TO_31, unit="px"),
                 ParameterSpec("sigma", "Sigma", ParameterKind.NUMBER, 1.0, 0.001, 100, "px"),
                 ParameterSpec("gain", "Ganho", ParameterKind.NUMBER, 1.0, 0, 100),
             ),
@@ -493,7 +495,7 @@ PROCESS_CATALOG = ProcessCatalog(
             label="Laplaciano",
             category="Realce e bordas",
             compatible_modes=frozenset({ImageMode.GRAYSCALE, ImageMode.RGB}),
-            parameters=(ParameterSpec("window", "Janela", ParameterKind.INTEGER, 3, 3, 7, "px"),),
+            parameters=(ParameterSpec("window", "Janela", ParameterKind.CHOICE, "3", choices=_WINDOWS_3_TO_7, unit="px"),),
             executor=_laplacian_executor,
         ),
         ProcessDefinition(
@@ -501,7 +503,7 @@ PROCESS_CATALOG = ProcessCatalog(
             label="Sobel",
             category="Realce e bordas",
             compatible_modes=frozenset({ImageMode.GRAYSCALE, ImageMode.RGB}),
-            parameters=(ParameterSpec("window", "Janela", ParameterKind.INTEGER, 3, 3, 7, "px"),),
+            parameters=(ParameterSpec("window", "Janela", ParameterKind.CHOICE, "3", choices=_WINDOWS_3_TO_7, unit="px"),),
             executor=_sobel_executor,
         ),
         ProcessDefinition(
@@ -509,7 +511,7 @@ PROCESS_CATALOG = ProcessCatalog(
             label="Filtro de mediana",
             category="Filtros espaciais",
             compatible_modes=frozenset({ImageMode.GRAYSCALE, ImageMode.RGB}),
-            parameters=(ParameterSpec("window", "Janela", ParameterKind.INTEGER, 3, 3, 31, "px"),),
+            parameters=(ParameterSpec("window", "Janela", ParameterKind.CHOICE, "3", choices=_WINDOWS_3_TO_31, unit="px"),),
             executor=_order_filter_executor("median"),
         ),
         ProcessDefinition(
@@ -517,7 +519,7 @@ PROCESS_CATALOG = ProcessCatalog(
             label="Filtro mínimo",
             category="Filtros espaciais",
             compatible_modes=frozenset({ImageMode.GRAYSCALE, ImageMode.RGB}),
-            parameters=(ParameterSpec("window", "Janela", ParameterKind.INTEGER, 3, 3, 31, "px"),),
+            parameters=(ParameterSpec("window", "Janela", ParameterKind.CHOICE, "3", choices=_WINDOWS_3_TO_31, unit="px"),),
             executor=_order_filter_executor("minimum"),
         ),
         ProcessDefinition(
@@ -525,7 +527,7 @@ PROCESS_CATALOG = ProcessCatalog(
             label="Filtro máximo",
             category="Filtros espaciais",
             compatible_modes=frozenset({ImageMode.GRAYSCALE, ImageMode.RGB}),
-            parameters=(ParameterSpec("window", "Janela", ParameterKind.INTEGER, 3, 3, 31, "px"),),
+            parameters=(ParameterSpec("window", "Janela", ParameterKind.CHOICE, "3", choices=_WINDOWS_3_TO_31, unit="px"),),
             executor=_order_filter_executor("maximum"),
         ),
         ProcessDefinition(
@@ -534,7 +536,7 @@ PROCESS_CATALOG = ProcessCatalog(
             category="Filtros espaciais",
             compatible_modes=frozenset({ImageMode.GRAYSCALE, ImageMode.RGB}),
             parameters=(
-                ParameterSpec("window", "Janela", ParameterKind.INTEGER, 3, 3, 31, "px"),
+                ParameterSpec("window", "Janela", ParameterKind.CHOICE, "3", choices=_WINDOWS_3_TO_31, unit="px"),
                 ParameterSpec("sigma", "Sigma", ParameterKind.NUMBER, 1.0, 0.001, 100, "px"),
             ),
             executor=_gaussian_blur_executor,
